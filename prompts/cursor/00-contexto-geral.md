@@ -39,7 +39,8 @@ Antes de implementar, consulte:
 2. `docs/02-arquitetura/mapa-de-modulos-do-backend.md` — Módulos do backend
 3. `docs/02-arquitetura/requisitos-nao-funcionais.md` — Requisitos não funcionais
 4. `docs/02-arquitetura/modelo-conceitual-de-dados.md` — Modelo conceitual de dados
-5. `docs/01-produto/requisitos-funcionais-consolidados.md` — Requisitos funcionais
+5. `docs/00-governanca/estrutura-de-repositorio-aplicacoes-e-convencoes.md` — Estrutura e convenções do repositório
+6. `docs/01-produto/requisitos-funcionais-consolidados.md` — Requisitos funcionais
 
 ## Prompts por área
 
