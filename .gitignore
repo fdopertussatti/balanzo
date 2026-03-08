@@ -1,0 +1,56 @@
+# Dependencies
+node_modules/
+.pnp/
+.pnp.js
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+.turbo/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+coverage/
+.nyc_output/
+
+# Temporary (pasta tmp/ existe mas conteúdo não é versionado)
+tmp/
+!tmp/.gitkeep
+*.tmp
+*.temp
+
+# Java
+target/
+*.class
+*.jar
+*.war
+
+# Flutter/Dart
+.dart_tool/
+.pub-cache/
+*.iml
+
+# Misc
+*.pem
