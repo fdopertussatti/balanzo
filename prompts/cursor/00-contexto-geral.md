@@ -20,12 +20,14 @@ Balanzo é um sistema de gestão financeira pessoal. Este repositório é um mon
 ## Backend
 
 - **Caminho:** `services/backend/`
-- **Stack:** Java (Spring Boot)
+- **Stack:** Java com Spring
 - **Papel:** API REST, regras de negócio, integrações
+- **Direcionamento:** Arquitetura limpa, modularidade forte, segurança por padrão, testes, observabilidade, evolução controlada
 
 ## Infraestrutura
 
 - **Supabase:** Auth, banco Postgres, storage, funções serverless
+- **Stripe:** Gateway de pagamento (módulo de monetização)
 - **Docker:** Containers para desenvolvimento e deploy
 - **Configuração:** `infra/`
 
@@ -34,9 +36,9 @@ Balanzo é um sistema de gestão financeira pessoal. Este repositório é um mon
 Antes de implementar, consulte:
 
 1. `docs/01-produto/documento-mestre-do-balanzo.md` — Visão do produto
-2. `docs/02-arquitetura/arquitetura-tecnica-inicial.md` — Arquitetura
-3. `docs/02-arquitetura/mapa-de-modulos-do-backend.md` — Módulos do backend
-4. `docs/01-produto/requisitos-funcionais-consolidados.md` — Requisitos
+2. `docs/02-arquitetura/mapa-de-modulos-do-backend.md` — Módulos do backend
+3. `docs/02-arquitetura/requisitos-nao-funcionais.md` — Requisitos não funcionais
+4. `docs/01-produto/requisitos-funcionais-consolidados.md` — Requisitos funcionais
 
 ## Prompts por área
 
