@@ -334,10 +334,7 @@ Todos os demais documentos técnicos do projeto devem partir desta base.
 
 ## Próximo passo do projeto
 
-Agora que o Documento Mestre foi definido, o próximo artefato que devemos produzir é:
+Com a documentação base consolidada, o próximo passo é a implementação:
 
-**Mapa de Módulos do Backend do Balanzo**
-
-Esse será o documento que transforma a arquitetura conceitual em estrutura concreta de engenharia.
-
-Ele servirá diretamente como base para desenvolvimento no Cursor AI.
+- **Bootstrap do backend:** `prompts/cursor/10-backend/00-inicializar-backend.md`
+- **Análise de prontidão:** `docs/00-governanca/analise-de-prontidao-para-implementacao.md`

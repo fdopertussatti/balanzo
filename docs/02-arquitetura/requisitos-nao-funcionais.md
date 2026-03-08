@@ -229,10 +229,6 @@ Este documento define os requisitos não funcionais que garantem a qualidade do 
 
 ---
 
-## Próximo artefato recomendado
+## Próximo passo
 
-Com base em: documento mestre, mapa de módulos, modelo conceitual, requisitos não funcionais e prompts para Cursor AI, o próximo documento estratégico ideal é:
-
-**Arquitetura Completa da Plataforma Balanzo**
-
-Esse documento consolidará: visão de alto nível da arquitetura, integração entre aplicações, infraestrutura, fluxos principais e organização final da stack tecnológica.
+Com a documentação consolidada, o próximo passo é a implementação. Ver `docs/00-governanca/analise-de-prontidao-para-implementacao.md`.

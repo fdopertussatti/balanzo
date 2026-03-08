@@ -250,3 +250,4 @@ Garante que o sistema represente corretamente as relações entre indivíduos, f
 
 - Requisitos Não Funcionais: `docs/02-arquitetura/requisitos-nao-funcionais.md`
 - Mapa de Módulos do Backend: `docs/02-arquitetura/mapa-de-modulos-do-backend.md`
+- Fontes canônicas: `docs/00-governanca/fontes-canonicas-do-projeto.md`
