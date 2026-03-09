@@ -27,7 +27,7 @@ Este documento define **onde está a verdade única** para cada tema do projeto.
 | Regras operacionais do Cursor | `prompts/cursor/01-regras-de-implementacao.md` | 00-contexto |
 | Estrutura do backend (camadas, pacotes) | `prompts/cursor/10-backend/01-estrutura-do-backend.md` | 00-inicializar |
 | Bootstrap do backend | `prompts/cursor/10-backend/00-inicializar-backend.md` | — |
-| Estratégia de autorização familiar | Pendente: `docs/02-arquitetura/estrategia-de-autorizacao-e-compartilhamento-familiar.md` | RNF (parcial) |
+| Estratégia de autorização familiar | `docs/02-arquitetura/estrategia-de-autorizacao-e-compartilhamento-familiar.md` | RNF, estrategia-auth |
 | Análise de prontidão | `docs/00-governanca/analise-de-prontidao-para-implementacao.md` | README |
 
 ---

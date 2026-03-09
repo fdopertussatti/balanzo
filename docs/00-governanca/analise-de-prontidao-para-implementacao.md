@@ -71,15 +71,11 @@ O texto detalhado (níveis PRIVATE, SHARED_READ, ANALYTICAL_ONLY, AuthorizationC
 
 **Impacto:** Necessário antes de implementar o módulo de autorização e regras de compartilhamento. Não bloqueia o bootstrap estrutural.
 
-**Ação:** Salvar em `docs/02-arquitetura/estrategia-de-autorizacao-e-compartilhamento-familiar.md` quando disponível.
+**Status:** Concluído — salvo em `docs/02-arquitetura/estrategia-de-autorizacao-e-compartilhamento-familiar.md`.
 
 ### 2. Schema SQL inicial
 
-O modelo conceitual existe. O schema físico (DDL) ainda não foi gerado.
-
-**Impacto:** Necessário para migrations e primeira implementação de entidades.
-
-**Ação:** Criar ao iniciar o módulo de persistência.
+**Status:** Concluído. DDL em `services/backend/src/main/resources/db/migration/V1__initial_schema.sql` (Flyway).
 
 ### 3. Diagramas de arquitetura
 
