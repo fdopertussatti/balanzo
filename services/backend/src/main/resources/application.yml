@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: balanzo-backend
+
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/balanzo}
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      minimum-idle: 2
+      maximum-pool-size: 10
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    open-in-view: false
+
+server:
+  port: ${SERVER_PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
+
+logging:
+  level:
+    br.com.balanzo: INFO
+    org.springframework.security: WARN
+
+# Supabase JWT: set for production to enable token validation
+# spring.security.oauth2.resourceserver.jwt.jwk-set-uri: https://<project-ref>.supabase.co/auth/v1/.well-known/jwks.json
