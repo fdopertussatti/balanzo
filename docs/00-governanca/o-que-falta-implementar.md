@@ -54,7 +54,7 @@
 | Perfil do usuário | ❌ |
 | Preferências (idioma, moeda, timezone) | ⚠️ Campos em User |
 | Ciclo de vida da conta (encerramento, exclusão) | ❌ |
-| API GET /api/v1/me (perfil) | ❌ |
+| API GET /api/v1/me (perfil) | ✅ |
 | API PATCH /api/v1/me (atualizar perfil) | ❌ |
 
 ### 2.3 Módulo família (parcial)
@@ -74,10 +74,10 @@
 
 | Item | Status |
 |------|--------|
-| Account entity + repository | ❌ |
-| Transaction entity + repository | ❌ |
-| API CRUD contas | ❌ |
-| API CRUD transações | ❌ |
+| Account entity + repository | ✅ |
+| Transaction entity + repository | ✅ |
+| API CRUD contas | ✅ |
+| API CRUD transações | ✅ |
 | Transferências internas | ❌ |
 | Importação de extratos | ❌ |
 | Faturas de cartão | ❌ |
@@ -87,23 +87,23 @@
 
 | Item | Status |
 |------|--------|
-| Category entity + repository | ❌ |
-| Categorias globais/familiares/individuais | ❌ |
-| Hierarquia (parent) | ❌ |
+| Category entity + repository | ✅ |
+| Categorias globais/familiares/individuais | ✅ |
+| Hierarquia (parent) | ✅ |
 | Tags | ❌ |
 | Regras de classificação | ❌ |
-| API categorias | ❌ |
+| API categorias | ✅ |
 
 ### 2.6 Módulo planejamento
 
 | Item | Status |
 |------|--------|
-| Budget entity + repository | ❌ |
-| Goal entity + repository | ❌ |
+| Budget entity + repository | ✅ |
+| Goal entity + repository | ✅ |
 | Provisões | ❌ |
 | Ciclo de revisão | ❌ |
-| API orçamento | ❌ |
-| API metas | ❌ |
+| API orçamento | ✅ |
+| API metas | ✅ |
 
 ### 2.7 Módulo patrimônio
 

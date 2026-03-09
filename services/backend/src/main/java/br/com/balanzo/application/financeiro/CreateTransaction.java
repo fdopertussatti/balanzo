@@ -1,9 +1,11 @@
 package br.com.balanzo.application.financeiro;
 
+import br.com.balanzo.domain.classificacao.entity.Category;
 import br.com.balanzo.domain.financeiro.entity.Account;
 import br.com.balanzo.domain.financeiro.entity.Transaction;
 import br.com.balanzo.domain.financeiro.entity.TransactionType;
 import br.com.balanzo.domain.identidade.entity.User;
+import br.com.balanzo.infrastructure.persistence.classificacao.CategoryRepository;
 import br.com.balanzo.infrastructure.persistence.financeiro.AccountRepository;
 import br.com.balanzo.infrastructure.persistence.financeiro.TransactionRepository;
 import br.com.balanzo.infrastructure.persistence.identidade.UserRepository;
@@ -42,6 +44,9 @@ public class CreateTransaction {
         Transaction tx = new Transaction(account, amount, currency, type, date, createdBy);
         if (description != null && !description.isBlank()) {
             tx.setDescription(description);
+        }
+        if (categoryId != null) {
+            categoryRepository.findById(categoryId).ifPresent(tx::setCategory);
         }
 
         return transactionRepository.save(tx);
