@@ -55,7 +55,7 @@
 | Preferências (idioma, moeda, timezone) | ⚠️ Campos em User |
 | Ciclo de vida da conta (encerramento, exclusão) | ❌ |
 | API GET /api/v1/me (perfil) | ✅ |
-| API PATCH /api/v1/me (atualizar perfil) | ❌ |
+| API PATCH /api/v1/me (atualizar perfil) | ✅ |
 
 ### 2.3 Módulo família (parcial)
 
@@ -109,10 +109,10 @@
 
 | Item | Status |
 |------|--------|
-| Asset entity + repository | ❌ |
+| Asset entity + repository | ✅ |
 | Passivos/Dívidas | ❌ |
 | Patrimônio consolidado | ❌ |
-| API ativos | ❌ |
+| API ativos | ✅ |
 
 ### 2.8 Módulo colaboração familiar
 
@@ -177,12 +177,12 @@ Conforme `docs/02-arquitetura/estrategia-de-autorizacao-e-compartilhamento-famil
 
 | Componente | Status |
 |------------|--------|
-| AuthorizationContext | ❌ |
-| ResourceScope | ❌ |
-| AccessPolicy (por entidade) | ❌ |
-| DomainAuthorizationService | ❌ |
-| Consulta em cada caso de uso | ❌ |
-| Níveis PRIVATE, SHARED_READ, ANALYTICAL_ONLY | ⚠️ No schema, não no código |
+| AuthorizationContext | ✅ |
+| ResourceScope | ✅ |
+| AccessPolicy (por entidade) | ⚠️ Parcial (lógica em DomainAuthorizationService) |
+| DomainAuthorizationService | ✅ |
+| Consulta em cada caso de uso | ⚠️ Estrutura pronta, integração gradual |
+| Níveis PRIVATE, SHARED_READ, ANALYTICAL_ONLY | ✅ |
 
 ---
 
