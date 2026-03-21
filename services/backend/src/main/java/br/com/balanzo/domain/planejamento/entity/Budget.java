@@ -51,6 +51,18 @@ public class Budget {
 
     protected Budget() {}
 
+    /** Factory for application layer. */
+    public static Budget create(OwnerScope ownerScope, LocalDate periodStart, LocalDate periodEnd,
+                                BigDecimal amount, String currency) {
+        Budget b = new Budget();
+        b.setOwnerScope(ownerScope);
+        b.setPeriodStart(periodStart);
+        b.setPeriodEnd(periodEnd);
+        b.setAmount(amount);
+        b.setCurrency(currency);
+        return b;
+    }
+
     public UUID getId() { return id; }
     public OwnerScope getOwnerScope() { return ownerScope; }
     public void setOwnerScope(OwnerScope ownerScope) { this.ownerScope = ownerScope; }

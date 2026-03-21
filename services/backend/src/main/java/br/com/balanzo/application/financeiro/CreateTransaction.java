@@ -22,15 +22,19 @@ public class CreateTransaction {
     private final AccountRepository accountRepository;
     private final UserRepository userRepository;
 
-    public CreateTransaction(TransactionRepository tr, AccountRepository ar, UserRepository ur) {
+    private final CategoryRepository categoryRepository;
+
+    public CreateTransaction(TransactionRepository tr, AccountRepository ar, UserRepository ur,
+                             CategoryRepository categoryRepository) {
         this.transactionRepository = tr;
         this.accountRepository = ar;
         this.userRepository = ur;
+        this.categoryRepository = categoryRepository;
     }
 
     @Transactional
     public Transaction run(UUID userId, UUID accountId, BigDecimal amount, String currency,
-                           TransactionType type, LocalDate date, String description) {
+                           TransactionType type, LocalDate date, String description, UUID categoryId) {
         User createdBy = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
 

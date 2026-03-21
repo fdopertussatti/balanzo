@@ -33,13 +33,7 @@ public class CreateBudget {
     @Transactional
     public Budget run(UUID userId, OwnerScope ownerScope, UUID familyId, UUID categoryId,
                       LocalDate periodStart, LocalDate periodEnd, BigDecimal amount, String currency) {
-        Budget b = new Budget();
-        b.setOwnerScope(ownerScope);
-        b.setPeriodStart(periodStart);
-        b.setPeriodEnd(periodEnd);
-        b.setAmount(amount);
-        b.setCurrency(currency != null ? currency : "BRL");
-
+        Budget b = Budget.create(ownerScope, periodStart, periodEnd, amount, currency != null ? currency : "BRL");
         if (ownerScope == OwnerScope.user) {
             User owner = userRepository.findById(userId)
                     .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));

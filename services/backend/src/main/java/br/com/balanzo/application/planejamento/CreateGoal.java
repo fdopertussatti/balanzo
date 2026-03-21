@@ -30,12 +30,8 @@ public class CreateGoal {
     @Transactional
     public Goal run(UUID userId, String name, BigDecimal targetAmount, String currency,
                     LocalDate targetDate, OwnerScope ownerScope, UUID familyId) {
-        Goal g = new Goal();
+        Goal g = Goal.create(name, targetAmount, currency, targetDate);
         g.setOwnerScope(ownerScope);
-        g.setName(name);
-        g.setTargetAmount(targetAmount);
-        g.setCurrency(currency != null ? currency : "BRL");
-        g.setTargetDate(targetDate);
 
         if (ownerScope == OwnerScope.user) {
             User owner = userRepository.findById(userId)

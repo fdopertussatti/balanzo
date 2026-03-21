@@ -52,6 +52,16 @@ public class Goal {
 
     protected Goal() {}
 
+    /** Factory for application layer. */
+    public static Goal create(String name, BigDecimal targetAmount, String currency, LocalDate targetDate) {
+        Goal g = new Goal();
+        g.setName(name);
+        g.setTargetAmount(targetAmount);
+        g.setCurrency(currency != null ? currency : "BRL");
+        g.setTargetDate(targetDate);
+        return g;
+    }
+
     public UUID getId() { return id; }
     public OwnerScope getOwnerScope() { return ownerScope; }
     public void setOwnerScope(OwnerScope ownerScope) { this.ownerScope = ownerScope; }
