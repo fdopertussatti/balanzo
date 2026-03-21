@@ -1,6 +1,8 @@
 package br.com.balanzo.api.v1;
 
 import br.com.balanzo.application.financeiro.CreateTransaction;
+import br.com.balanzo.common.exception.ResourceNotFoundException;
+import br.com.balanzo.common.security.CurrentUserResolver;
 import br.com.balanzo.domain.financeiro.entity.Transaction;
 import br.com.balanzo.domain.financeiro.entity.TransactionType;
 import br.com.balanzo.infrastructure.persistence.financeiro.AccountRepository;
@@ -15,7 +17,6 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,13 +32,16 @@ public class TransactionsController {
     private final TransactionRepository transactionRepository;
     private final AccountRepository accountRepository;
     private final CreateTransaction createTransaction;
+    private final CurrentUserResolver currentUser;
 
     public TransactionsController(TransactionRepository transactionRepository,
                                   AccountRepository accountRepository,
-                                  CreateTransaction createTransaction) {
+                                  CreateTransaction createTransaction,
+                                  CurrentUserResolver currentUser) {
         this.transactionRepository = transactionRepository;
         this.accountRepository = accountRepository;
         this.createTransaction = createTransaction;
+        this.currentUser = currentUser;
     }
 
     @GetMapping("/{accountId}/transactions")
@@ -45,14 +49,15 @@ public class TransactionsController {
                                                           @PathVariable UUID accountId,
                                                           @RequestParam(required = false) LocalDate start,
                                                           @RequestParam(required = false) LocalDate end) {
-        UUID userId = userIdFrom(principal);
+        UUID userId = currentUser.resolve(principal).orElse(null);
         if (userId == null) {
             return ResponseEntity.ok(List.of());
         }
 
-        var account = accountRepository.findById(accountId).orElse(null);
-        if (account == null || !account.getOwner().getId().equals(userId)) {
-            return ResponseEntity.notFound().build();
+        var account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new ResourceNotFoundException("Account", accountId));
+        if (!account.getOwner().getId().equals(userId)) {
+            throw new ResourceNotFoundException("Account", accountId);
         }
 
         List<Transaction> transactions;
@@ -72,7 +77,7 @@ public class TransactionsController {
     public ResponseEntity<TransactionSummary> create(Principal principal,
                                                      @PathVariable UUID accountId,
                                                      @Valid @RequestBody CreateTransactionRequest request) {
-        UUID userId = requireUserId(principal);
+        UUID userId = currentUser.require(principal);
         Transaction tx = createTransaction.run(
                 userId,
                 accountId,
@@ -84,27 +89,6 @@ public class TransactionsController {
                 request.categoryId()
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(toSummary(tx));
-    }
-
-    private UUID userIdFrom(Principal principal) {
-        if (principal instanceof Jwt jwt) {
-            var sub = jwt.getSubject();
-            if (sub != null) {
-                try {
-                    return UUID.fromString(sub);
-                } catch (IllegalArgumentException ignored) {
-                }
-            }
-        }
-        return null;
-    }
-
-    private UUID requireUserId(Principal principal) {
-        UUID userId = userIdFrom(principal);
-        if (userId == null) {
-            throw new IllegalArgumentException("Authentication required");
-        }
-        return userId;
     }
 
     private TransactionSummary toSummary(Transaction t) {

@@ -1,6 +1,7 @@
 package br.com.balanzo.api.v1;
 
 import br.com.balanzo.application.financeiro.CreateAccount;
+import br.com.balanzo.common.security.CurrentUserResolver;
 import br.com.balanzo.domain.financeiro.entity.Account;
 import br.com.balanzo.domain.financeiro.entity.AccountType;
 import br.com.balanzo.infrastructure.persistence.financeiro.AccountRepository;
@@ -12,7 +13,6 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,29 +25,27 @@ public class AccountsController {
 
     private final AccountRepository accountRepository;
     private final CreateAccount createAccount;
+    private final CurrentUserResolver currentUser;
 
-    public AccountsController(AccountRepository accountRepository, CreateAccount createAccount) {
+    public AccountsController(AccountRepository accountRepository, CreateAccount createAccount,
+                              CurrentUserResolver currentUser) {
         this.accountRepository = accountRepository;
         this.createAccount = createAccount;
+        this.currentUser = currentUser;
     }
 
     @GetMapping
     public ResponseEntity<List<AccountSummary>> list(Principal principal) {
-        UUID userId = userIdFrom(principal);
-        if (userId == null) {
-            return ResponseEntity.ok(List.of());
-        }
-
-        var accounts = accountRepository.findByOwnerId(userId);
-        var summaries = accounts.stream()
-                .map(this::toSummary)
-                .toList();
-        return ResponseEntity.ok(summaries);
+        return currentUser.resolve(principal)
+                .map(userId -> ResponseEntity.ok(accountRepository.findByOwnerId(userId).stream()
+                        .map(this::toSummary)
+                        .toList()))
+                .orElse(ResponseEntity.ok(List.of()));
     }
 
     @PostMapping
     public ResponseEntity<AccountSummary> create(Principal principal, @Valid @RequestBody CreateAccountRequest request) {
-        UUID userId = requireUserId(principal);
+        UUID userId = currentUser.require(principal);
         Account account = createAccount.run(
                 userId,
                 request.name(),
@@ -56,27 +54,6 @@ public class AccountsController {
                 request.institution()
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(toSummary(account));
-    }
-
-    private UUID userIdFrom(Principal principal) {
-        if (principal instanceof Jwt jwt) {
-            var sub = jwt.getSubject();
-            if (sub != null) {
-                try {
-                    return UUID.fromString(sub);
-                } catch (IllegalArgumentException ignored) {
-                }
-            }
-        }
-        return null;
-    }
-
-    private UUID requireUserId(Principal principal) {
-        UUID userId = userIdFrom(principal);
-        if (userId == null) {
-            throw new IllegalArgumentException("Authentication required");
-        }
-        return userId;
     }
 
     private AccountSummary toSummary(Account a) {

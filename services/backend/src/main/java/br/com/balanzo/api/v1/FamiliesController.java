@@ -2,6 +2,7 @@ package br.com.balanzo.api.v1;
 
 import br.com.balanzo.application.familia.AddFamilyMember;
 import br.com.balanzo.application.familia.CreateFamily;
+import br.com.balanzo.common.security.CurrentUserResolver;
 import br.com.balanzo.domain.familia.entity.Family;
 import br.com.balanzo.domain.familia.entity.FamilyMember;
 import br.com.balanzo.domain.familia.entity.FamilyMemberRole;
@@ -16,7 +17,6 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,53 +32,35 @@ public class FamiliesController {
     private final FamilyMemberRepository familyMemberRepository;
     private final CreateFamily createFamily;
     private final AddFamilyMember addFamilyMember;
+    private final CurrentUserResolver currentUser;
 
     public FamiliesController(FamilyRepository familyRepository,
                               FamilyMemberRepository familyMemberRepository,
                               CreateFamily createFamily,
-                              AddFamilyMember addFamilyMember) {
+                              AddFamilyMember addFamilyMember,
+                              CurrentUserResolver currentUser) {
         this.familyRepository = familyRepository;
         this.familyMemberRepository = familyMemberRepository;
         this.createFamily = createFamily;
         this.addFamilyMember = addFamilyMember;
+        this.currentUser = currentUser;
     }
 
     @GetMapping
     public ResponseEntity<List<FamilySummary>> list(Principal principal) {
-        UUID userId = userIdFrom(principal);
-        if (userId == null) {
-            return ResponseEntity.ok(List.of());
-        }
-
-        var members = familyMemberRepository.findByUserIdAndStatus(userId, FamilyMemberStatus.active);
-        var familyIds = members.stream()
-                .map(m -> m.getFamily().getId())
-                .toList();
-
-        var families = familyRepository.findAllById(familyIds);
-        var summaries = families.stream()
-                .map(this::toSummary)
-                .toList();
-
-        return ResponseEntity.ok(summaries);
-    }
-
-    private UUID userIdFrom(Principal principal) {
-        if (principal instanceof Jwt jwt) {
-            var sub = jwt.getSubject();
-            if (sub != null) {
-                try {
-                    return UUID.fromString(sub);
-                } catch (IllegalArgumentException ignored) {
-                }
-            }
-        }
-        return null;
+        return currentUser.resolve(principal)
+                .map(userId -> {
+                    var members = familyMemberRepository.findByUserIdAndStatus(userId, FamilyMemberStatus.active);
+                    var familyIds = members.stream().map(m -> m.getFamily().getId()).toList();
+                    var families = familyRepository.findAllById(familyIds);
+                    return ResponseEntity.ok(families.stream().map(this::toSummary).toList());
+                })
+                .orElse(ResponseEntity.ok(List.of()));
     }
 
     @PostMapping
     public ResponseEntity<FamilySummary> create(Principal principal, @Valid @RequestBody CreateFamilyRequest request) {
-        UUID userId = requireUserId(principal);
+        UUID userId = currentUser.require(principal);
         Family family = createFamily.run(userId, request.name());
         return ResponseEntity.status(HttpStatus.CREATED).body(toSummary(family));
     }
@@ -87,17 +69,9 @@ public class FamiliesController {
     public ResponseEntity<MemberSummary> addMember(Principal principal,
                                                    @PathVariable UUID familyId,
                                                    @Valid @RequestBody AddMemberRequest request) {
-        UUID userId = requireUserId(principal);
+        UUID userId = currentUser.require(principal);
         FamilyMember member = addFamilyMember.run(userId, familyId, request.userId(), request.role());
         return ResponseEntity.status(HttpStatus.CREATED).body(toMemberSummary(member));
-    }
-
-    private UUID requireUserId(Principal principal) {
-        UUID userId = userIdFrom(principal);
-        if (userId == null) {
-            throw new IllegalArgumentException("Authentication required");
-        }
-        return userId;
     }
 
     private FamilySummary toSummary(Family f) {

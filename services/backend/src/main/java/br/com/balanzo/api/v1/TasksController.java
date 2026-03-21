@@ -15,7 +15,8 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.jwt.Jwt;
+import br.com.balanzo.common.exception.ForbiddenException;
+import br.com.balanzo.common.security.CurrentUserResolver;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -25,23 +26,23 @@ public class TasksController {
     private final TaskRepository taskRepository;
     private final CreateTask createTask;
     private final FamilyMemberRepository familyMemberRepository;
+    private final CurrentUserResolver currentUser;
 
     public TasksController(TaskRepository taskRepository, CreateTask createTask,
-                           FamilyMemberRepository familyMemberRepository) {
+                           FamilyMemberRepository familyMemberRepository,
+                           CurrentUserResolver currentUser) {
         this.taskRepository = taskRepository;
         this.createTask = createTask;
         this.familyMemberRepository = familyMemberRepository;
+        this.currentUser = currentUser;
     }
 
     @GetMapping
     public ResponseEntity<List<TaskSummary>> list(Principal principal, @PathVariable UUID familyId) {
-        UUID userId = userIdFrom(principal);
-        if (userId == null) {
-            return ResponseEntity.status(401).build();
-        }
+        UUID userId = currentUser.require(principal);
         var member = familyMemberRepository.findByFamilyIdAndUserId(familyId, userId);
         if (member.isEmpty() || member.get().getStatus() != FamilyMemberStatus.active) {
-            return ResponseEntity.status(403).build();
+            throw new ForbiddenException("Not a member of this family");
         }
         var tasks = taskRepository.findByFamilyIdOrderByDueDateAsc(familyId);
         return ResponseEntity.ok(tasks.stream().map(this::toSummary).toList());
@@ -51,25 +52,10 @@ public class TasksController {
     public ResponseEntity<TaskSummary> create(Principal principal,
                                               @PathVariable UUID familyId,
                                               @Valid @RequestBody CreateTaskRequest req) {
-        UUID userId = requireUserId(principal);
+        UUID userId = currentUser.require(principal);
         Task t = createTask.run(userId, familyId, req.title(), req.description(),
                 req.assignedToId(), req.priority(), req.dueDate());
         return ResponseEntity.status(HttpStatus.CREATED).body(toSummary(t));
-    }
-
-    private UUID userIdFrom(Principal principal) {
-        if (principal instanceof Jwt jwt && jwt.getSubject() != null) {
-            try {
-                return UUID.fromString(jwt.getSubject());
-            } catch (IllegalArgumentException ignored) {}
-        }
-        return null;
-    }
-
-    private UUID requireUserId(Principal principal) {
-        UUID userId = userIdFrom(principal);
-        if (userId == null) throw new IllegalArgumentException("Authentication required");
-        return userId;
     }
 
     private TaskSummary toSummary(Task t) {

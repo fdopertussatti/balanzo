@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.jwt.Jwt;
+import br.com.balanzo.common.security.CurrentUserResolver;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -22,16 +22,19 @@ public class BudgetsController {
 
     private final BudgetRepository budgetRepository;
     private final CreateBudget createBudget;
+    private final CurrentUserResolver currentUser;
 
-    public BudgetsController(BudgetRepository budgetRepository, CreateBudget createBudget) {
+    public BudgetsController(BudgetRepository budgetRepository, CreateBudget createBudget,
+                             CurrentUserResolver currentUser) {
         this.budgetRepository = budgetRepository;
         this.createBudget = createBudget;
+        this.currentUser = currentUser;
     }
 
     @GetMapping
     public ResponseEntity<List<BudgetSummary>> list(Principal principal,
                                                     @RequestParam(required = false) UUID familyId) {
-        UUID userId = requireUserId(principal);
+        UUID userId = currentUser.require(principal);
         List<Budget> budgets;
         if (familyId != null) {
             budgets = budgetRepository.findByOwnerScopeAndOwnerFamilyId(OwnerScope.family, familyId);
@@ -43,19 +46,10 @@ public class BudgetsController {
 
     @PostMapping
     public ResponseEntity<BudgetSummary> create(Principal principal, @Valid @RequestBody CreateBudgetRequest req) {
-        UUID userId = requireUserId(principal);
+        UUID userId = currentUser.require(principal);
         Budget b = createBudget.run(userId, req.ownerScope(), req.familyId(), req.categoryId(),
                 req.periodStart(), req.periodEnd(), req.amount(), req.currency());
         return ResponseEntity.status(HttpStatus.CREATED).body(toSummary(b));
-    }
-
-    private UUID requireUserId(Principal principal) {
-        if (principal instanceof Jwt jwt && jwt.getSubject() != null) {
-            try {
-                return UUID.fromString(jwt.getSubject());
-            } catch (IllegalArgumentException ignored) {}
-        }
-        throw new IllegalArgumentException("Authentication required");
     }
 
     private BudgetSummary toSummary(Budget b) {

@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.jwt.Jwt;
+import br.com.balanzo.common.security.CurrentUserResolver;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,16 +23,19 @@ public class GoalsController {
 
     private final GoalRepository goalRepository;
     private final CreateGoal createGoal;
+    private final CurrentUserResolver currentUser;
 
-    public GoalsController(GoalRepository goalRepository, CreateGoal createGoal) {
+    public GoalsController(GoalRepository goalRepository, CreateGoal createGoal,
+                           CurrentUserResolver currentUser) {
         this.goalRepository = goalRepository;
         this.createGoal = createGoal;
+        this.currentUser = currentUser;
     }
 
     @GetMapping
     public ResponseEntity<List<GoalSummary>> list(Principal principal,
                                                   @RequestParam(required = false) UUID familyId) {
-        UUID userId = requireUserId(principal);
+        UUID userId = currentUser.require(principal);
         List<Goal> goals;
         if (familyId != null) {
             goals = goalRepository.findByOwnerScopeAndOwnerFamilyId(OwnerScope.family, familyId);
@@ -44,19 +47,10 @@ public class GoalsController {
 
     @PostMapping
     public ResponseEntity<GoalSummary> create(Principal principal, @Valid @RequestBody CreateGoalRequest req) {
-        UUID userId = requireUserId(principal);
+        UUID userId = currentUser.require(principal);
         Goal g = createGoal.run(userId, req.name(), req.targetAmount(), req.currency(),
                 req.targetDate(), req.ownerScope(), req.familyId());
         return ResponseEntity.status(HttpStatus.CREATED).body(toSummary(g));
-    }
-
-    private UUID requireUserId(Principal principal) {
-        if (principal instanceof Jwt jwt && jwt.getSubject() != null) {
-            try {
-                return UUID.fromString(jwt.getSubject());
-            } catch (IllegalArgumentException ignored) {}
-        }
-        throw new IllegalArgumentException("Authentication required");
     }
 
     private GoalSummary toSummary(Goal g) {
