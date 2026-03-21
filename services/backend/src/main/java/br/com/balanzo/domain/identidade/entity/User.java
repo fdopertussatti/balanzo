@@ -2,6 +2,7 @@ package br.com.balanzo.domain.identidade.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
@@ -35,6 +36,11 @@ public class User {
 
     @Column(name = "updated_at", nullable = false)
     private java.time.Instant updatedAt = java.time.Instant.now();
+
+    @PreUpdate
+    void onUpdate() {
+        updatedAt = java.time.Instant.now();
+    }
 
     protected User() {}
 
