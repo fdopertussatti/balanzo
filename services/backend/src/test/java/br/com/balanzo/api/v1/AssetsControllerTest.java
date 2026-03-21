@@ -1,7 +1,7 @@
 package br.com.balanzo.api.v1;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,7 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-class MeControllerTest {
+class AssetsControllerTest {
 
     @Autowired
     MockMvc mockMvc;
@@ -26,17 +26,28 @@ class MeControllerTest {
     ObjectMapper objectMapper;
 
     @Test
-    void getMe_returns401_whenNoAuth() throws Exception {
-        mockMvc.perform(get("/api/v1/me"))
+    void listAssets_returns401_whenNoAuth() throws Exception {
+        mockMvc.perform(get("/api/v1/assets"))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
-    void patchMe_returns401_whenNoAuth() throws Exception {
-        var body = Map.of("name", "Updated Name");
-        mockMvc.perform(patch("/api/v1/me")
+    void listAssetsWithFamilyId_returns401_whenNoAuth() throws Exception {
+        mockMvc.perform(get("/api/v1/assets").param("familyId", "00000000-0000-0000-0000-000000000001"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void createAsset_returns401_whenNoAuth() throws Exception {
+        var body = Map.of(
+                "name", "Casa",
+                "type", "real_estate",
+                "ownerScope", "user"
+        );
+        mockMvc.perform(post("/api/v1/assets")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isUnauthorized());
     }
+
 }
