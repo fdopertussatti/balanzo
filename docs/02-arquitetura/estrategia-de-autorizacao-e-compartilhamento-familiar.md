@@ -132,8 +132,13 @@ Criar camada explícita de autorização de domínio. Componentes:
 - **ResourceScope:** tipo de entidade, proprietário, pertencimento, visibilidade
 - **AccessPolicy:** políticas por domínio (TransactionAccessPolicy, AccountAccessPolicy, etc.)
 - **DomainAuthorizationService:** orquestra avaliação
+- **AuthorizationContextResolver**: monta contexto com `familyIds` ativos do usuário
+- **FamilyScopeAccess**: atalhos para leitura/edição em recursos familiares (budgets, goals, tasks, assets)
+- **TransactionResourceScopeFactory** + **VisibilityScopeMapper**: transações com `visibility_scope` em contas vinculadas à família
 
 Cada caso de uso importante consulta essa camada.
+
+**Transações:** o titular da conta vê todas as transações; membro da família (conta com `family_id`) só vê linhas cuja visibilidade permite leitura (ex.: `PRIVATE` e `ANALYTICAL_ONLY` ficam ocultas ao não titular). Criação de transação permanece restrita ao titular da conta até políticas de co-titularidade.
 
 ---
 

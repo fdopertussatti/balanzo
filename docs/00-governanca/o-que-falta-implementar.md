@@ -179,9 +179,12 @@ Conforme `docs/02-arquitetura/estrategia-de-autorizacao-e-compartilhamento-famil
 |------------|--------|
 | AuthorizationContext | ✅ |
 | ResourceScope | ✅ |
+| AuthorizationContextResolver + FamilyScopeAccess | ✅ |
 | AccessPolicy (por entidade) | ⚠️ Parcial (lógica em DomainAuthorizationService) |
 | DomainAuthorizationService | ✅ |
-| Consulta em cada caso de uso | ⚠️ Estrutura pronta, integração gradual |
+| Integração escopo familiar (Asset, Budget, Goal, Task) | ✅ |
+| Transações: visibilidade por conta familiar + nível `visibility_scope` | ✅ |
+| Consulta em cada caso de uso | ⚠️ Parcial (ex.: políticas finas por papel na família) |
 | Níveis PRIVATE, SHARED_READ, ANALYTICAL_ONLY | ✅ |
 
 ---
