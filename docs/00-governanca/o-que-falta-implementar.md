@@ -1,7 +1,7 @@
 # O que falta implementar — Balanzo
 
 **Versão:** 1.1  
-**Última atualização:** 2026-03-22  
+**Última atualização:** 2026-03-23  
 **Status:** Ativo
 
 > **Regra de desenvolvimento:** Sempre manter este documento e os demais em `docs/` atualizados após cada entrega ou mudança relevante. Ver `.cursor/rules/docs-sempre-atualizados.mdc` e `docs/00-governanca/convencoes-de-commit-e-push.md`.
@@ -25,7 +25,7 @@
 | Backend — monetização | ❌ | Plan, Subscription, Stripe |
 | Backend — administração | ❌ | Auditoria, visão admin, incidentes |
 | Autorização de domínio | ⚠️ Parcial | AccessPolicy por entidade, políticas finas |
-| Frontend web | ❌ | Next.js, auth, dashboard |
+| Frontend web | ⚠️ Parcial | Telas completas, UX |
 | Frontend admin | ❌ | — |
 | App mobile | ❌ | — |
 | Site institucional | ❌ | — |
@@ -200,10 +200,10 @@ Conforme `docs/02-arquitetura/estrategia-de-autorizacao-e-compartilhamento-famil
 
 | Item | Status |
 |------|--------|
-| Projeto Next.js | ❌ (apenas .gitkeep) |
-| Auth Supabase | ❌ |
-| Dashboard | ❌ |
-| Telas principais | ❌ |
+| Projeto Next.js | ✅ |
+| Auth Supabase (login/cadastro) | ✅ |
+| Dashboard (contas, transações) | ✅ |
+| Telas principais | ⚠️ Mínimo (listagem) |
 
 ### 4.2 Frontend admin (apps/admin)
 
@@ -231,7 +231,7 @@ Conforme `docs/02-arquitetura/estrategia-de-autorizacao-e-compartilhamento-famil
 |------|--------|
 | Supabase (projeto configurado) | ❌ |
 | CI/CD (GitHub Actions) | ❌ |
-| Docker Compose local | ❌ |
+| Docker Compose local (Postgres) | ✅ |
 | Variáveis de ambiente (secrets) | 📄 Docs existem |
 | Deploy (Vercel, etc.) | ❌ |
 
@@ -243,7 +243,7 @@ Ordem sugerida com base no que já está implementado e no caminho crítico para
 
 | # | Entregável | Motivo |
 |---|------------|--------|
-| 1 | **Frontend web mínimo** — Next.js, auth Supabase, dashboard, listagem contas/transações | Validar fluxo completo; sem frontend o produto não é utilizável |
+| 1 | **Frontend web** — telas completas, UX, CRUD contas/transações | Já tem login + dashboard; evoluir para fluxo completo |
 | 2 | **Convites por email** — fluxo de convite/aceitar/rejeitar na família | Diferencial colaborativo; depende de família para consolidar dados |
 | 3 | **Transferências internas** — entre contas do mesmo usuário | Funcionalidade financeira esperada; complementa CRUD transações |
 | 4 | **Módulo colaboração** — rateios, reembolsos (ou despesas compartilhadas) | Núcleo do valor familiar do produto |
@@ -254,7 +254,7 @@ Ordem sugerida com base no que já está implementado e no caminho crítico para
 | 9 | **Importação de extratos** | Conveniência para usuário |
 | 10 | **Notificações base** | Alertas, lembretes |
 
-**Já entregue (base do MVP):** autorização de domínio, financeiro base, planejamento, patrimônio (ativos), tarefas, categorização, identidade (perfil).
+**Já entregue (base do MVP):** autorização de domínio, financeiro base, planejamento, patrimônio (ativos), tarefas, categorização, identidade (perfil), frontend web mínimo (login + dashboard).
 
 ---
 
