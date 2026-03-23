@@ -1,8 +1,16 @@
 # Convenções de commit e push
 
-**Versão:** 1.0  
-**Última atualização:** 2025-03-07  
+**Versão:** 1.1  
+**Última atualização:** 2026-03-22  
 **Status:** Aprovado
+
+---
+
+## Documentação sempre atualizada
+
+Após cada entrega ou mudança relevante, manter `docs/` alinhada ao estado do projeto. Em especial, atualizar `o-que-falta-implementar.md` (resumo executivo, status dos módulos, prioridade).
+
+Regra persistente: `.cursor/rules/docs-sempre-atualizados.mdc`.
 
 ---
 

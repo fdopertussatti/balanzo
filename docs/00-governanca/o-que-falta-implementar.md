@@ -1,8 +1,10 @@
 # O que falta implementar — Balanzo
 
-**Versão:** 1.0  
-**Última atualização:** 2025-03-07  
+**Versão:** 1.1  
+**Última atualização:** 2026-03-22  
 **Status:** Ativo
+
+> **Regra de desenvolvimento:** Sempre manter este documento e os demais em `docs/` atualizados após cada entrega ou mudança relevante. Ver `.cursor/rules/docs-sempre-atualizados.mdc` e `docs/00-governanca/convencoes-de-commit-e-push.md`.
 
 ---
 
@@ -11,23 +13,23 @@
 | Área | Implementado | Pendente |
 |------|--------------|----------|
 | Backend — estrutura | ✅ | — |
-| Backend — identidade | ⚠️ Parcial | Perfil, preferências, ciclo de vida |
-| Backend — família | ⚠️ Parcial | Convites, visibilidade, dependentes |
-| Backend — financeiro | ❌ | Contas, transações, categorias |
-| Backend — planejamento | ❌ | Orçamento, metas |
-| Backend — patrimônio | ❌ | Ativos, passivos |
-| Backend — colaboração | ❌ | Rateios, reembolsos |
-| Backend — tarefas | ❌ | Tarefas, projetos, templates |
-| Backend — documentos | ❌ | Anexos, storage |
-| Backend — notificações | ❌ | Alertas, eventos |
-| Backend — monetização | ❌ | Planos, Stripe |
-| Backend — administração | ❌ | Auditoria, admin |
-| Autorização de domínio | ❌ | AuthorizationContext, AccessPolicy |
-| Frontend web | ❌ | — |
+| Backend — identidade | ⚠️ Parcial | Ciclo de vida (encerramento, exclusão) |
+| Backend — família | ⚠️ Parcial | Convites por email, aceitar/rejeitar, sair, dependentes, visibilidade |
+| Backend — financeiro | ⚠️ Parcial | Transferências, importação, faturas cartão, parcelamentos |
+| Backend — planejamento | ⚠️ Parcial | Provisões, ciclo de revisão |
+| Backend — patrimônio | ⚠️ Parcial | Passivos/dívidas, consolidado |
+| Backend — colaboração | ❌ | Despesas compartilhadas, rateios, reembolsos, mesadas, carteira supervisionada |
+| Backend — tarefas | ⚠️ Parcial | TaskTemplate, projetos, templates, gamificação |
+| Backend — documentos | ❌ | Document entity, Storage, anexos |
+| Backend — notificações | ❌ | Alertas, lembretes, preferências |
+| Backend — monetização | ❌ | Plan, Subscription, Stripe |
+| Backend — administração | ❌ | Auditoria, visão admin, incidentes |
+| Autorização de domínio | ⚠️ Parcial | AccessPolicy por entidade, políticas finas |
+| Frontend web | ❌ | Next.js, auth, dashboard |
 | Frontend admin | ❌ | — |
 | App mobile | ❌ | — |
 | Site institucional | ❌ | — |
-| Infra/DevOps | ❌ | CI/CD, Supabase, deploy |
+| Infra/DevOps | ❌ | Supabase, CI/CD, Docker, deploy |
 
 ---
 
@@ -128,10 +130,10 @@
 
 | Item | Status |
 |------|--------|
-| Task entity + repository | ❌ |
+| Task entity + repository | ✅ |
+| API tarefas (GET/POST por família) | ✅ |
 | TaskTemplate entity + repository | ❌ |
 | Projetos familiares | ❌ |
-| API tarefas | ❌ |
 | API templates | ❌ |
 | Gamificação (pontuação) | ❌ |
 
@@ -235,15 +237,24 @@ Conforme `docs/02-arquitetura/estrategia-de-autorizacao-e-compartilhamento-famil
 
 ---
 
-## 6. Prioridade sugerida (MVP)
+## 6. Prioridade sugerida (próximas entregas)
 
-1. **Camada de autorização** — base para filtrar dados por usuário/família
-2. **Módulo financeiro base** — Account, Transaction, Category
-3. **API contas e transações** — CRUD com autorização
-4. **Frontend web mínimo** — login + dashboard + listagem
-5. **Módulo planejamento** — Budget, Goal
-6. **Módulo tarefas** — Task, TaskTemplate
-7. **Monetização (Stripe)** — planos, assinatura
+Ordem sugerida com base no que já está implementado e no caminho crítico para MVP:
+
+| # | Entregável | Motivo |
+|---|------------|--------|
+| 1 | **Frontend web mínimo** — Next.js, auth Supabase, dashboard, listagem contas/transações | Validar fluxo completo; sem frontend o produto não é utilizável |
+| 2 | **Convites por email** — fluxo de convite/aceitar/rejeitar na família | Diferencial colaborativo; depende de família para consolidar dados |
+| 3 | **Transferências internas** — entre contas do mesmo usuário | Funcionalidade financeira esperada; complementa CRUD transações |
+| 4 | **Módulo colaboração** — rateios, reembolsos (ou despesas compartilhadas) | Núcleo do valor familiar do produto |
+| 5 | **Passivos/dívidas** — extensão do patrimônio | Complementa visão patrimonial |
+| 6 | **CI/CD + Docker Compose** | Automação e ambiente reprodutível |
+| 7 | **TaskTemplate + API templates** | Completa módulo tarefas |
+| 8 | **Monetização (Stripe)** — planos, assinatura | Viabilidade comercial |
+| 9 | **Importação de extratos** | Conveniência para usuário |
+| 10 | **Notificações base** | Alertas, lembretes |
+
+**Já entregue (base do MVP):** autorização de domínio, financeiro base, planejamento, patrimônio (ativos), tarefas, categorização, identidade (perfil).
 
 ---
 
@@ -254,3 +265,5 @@ Conforme `docs/02-arquitetura/estrategia-de-autorizacao-e-compartilhamento-famil
 - `docs/02-arquitetura/modelo-conceitual-de-dados.md`
 - `docs/02-arquitetura/estrategia-de-autorizacao-e-compartilhamento-familiar.md`
 - `docs/00-governanca/analise-de-prontidao-para-implementacao.md`
+- `docs/00-governanca/convencoes-de-commit-e-push.md`
+- `.cursor/rules/docs-sempre-atualizados.mdc`

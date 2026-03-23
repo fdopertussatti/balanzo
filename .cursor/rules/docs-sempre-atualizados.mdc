@@ -1,0 +1,36 @@
+---
+description: Manter documentação atualizada após cada entrega
+alwaysApply: true
+---
+
+# Documentação sempre atualizada
+
+## Regra
+
+Após cada entrega, mudança de funcionalidade ou decisão relevante, **atualizar os documentos em `docs/`** para refletir o estado atual do projeto.
+
+## O que atualizar
+
+1. **`docs/00-governanca/o-que-falta-implementar.md`**
+   - Resumo executivo (seção 1)
+   - Tabelas de status dos módulos (seções 2.x)
+   - Autorização de domínio (seção 3)
+   - Prioridade sugerida (seção 6)
+   - Campo "Última atualização" no cabeçalho
+
+2. **Demais docs** quando aplicável:
+   - Arquitetura, modelo de dados, estratégias
+   - Decisões técnicas em `docs/07-decisoes/` (se existir)
+
+## Quando atualizar
+
+- Ao concluir uma feature ou refatoração significativa
+- Ao alterar API, contratos ou comportamento público
+- No mesmo commit ou em commit `docs:` imediatamente seguinte
+
+## Exemplo
+
+Após implementar "Transferências internas":
+- Marcar como ✅ em `o-que-falta-implementar.md` seção 2.4
+- Ajustar resumo executivo se necessário
+- Atualizar data no cabeçalho
