@@ -1,10 +1,8 @@
 package br.com.balanzo.api.v1;
 
 import br.com.balanzo.application.tarefas.CreateTask;
-import br.com.balanzo.domain.familia.entity.FamilyMemberStatus;
 import br.com.balanzo.domain.tarefas.entity.Task;
 import br.com.balanzo.domain.tarefas.entity.TaskPriority;
-import br.com.balanzo.infrastructure.persistence.familia.FamilyMemberRepository;
 import br.com.balanzo.infrastructure.persistence.tarefas.TaskRepository;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -15,8 +13,8 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import br.com.balanzo.common.exception.ForbiddenException;
 import br.com.balanzo.common.security.CurrentUserResolver;
+import br.com.balanzo.security.authorization.FamilyScopeAccess;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -25,25 +23,22 @@ public class TasksController {
 
     private final TaskRepository taskRepository;
     private final CreateTask createTask;
-    private final FamilyMemberRepository familyMemberRepository;
+    private final FamilyScopeAccess familyScopeAccess;
     private final CurrentUserResolver currentUser;
 
     public TasksController(TaskRepository taskRepository, CreateTask createTask,
-                           FamilyMemberRepository familyMemberRepository,
+                           FamilyScopeAccess familyScopeAccess,
                            CurrentUserResolver currentUser) {
         this.taskRepository = taskRepository;
         this.createTask = createTask;
-        this.familyMemberRepository = familyMemberRepository;
+        this.familyScopeAccess = familyScopeAccess;
         this.currentUser = currentUser;
     }
 
     @GetMapping
     public ResponseEntity<List<TaskSummary>> list(Principal principal, @PathVariable UUID familyId) {
         UUID userId = currentUser.require(principal);
-        var member = familyMemberRepository.findByFamilyIdAndUserId(familyId, userId);
-        if (member.isEmpty() || member.get().getStatus() != FamilyMemberStatus.active) {
-            throw new ForbiddenException("Not a member of this family");
-        }
+        familyScopeAccess.requireMemberCanView(userId, familyId);
         var tasks = taskRepository.findByFamilyIdOrderByDueDateAsc(familyId);
         return ResponseEntity.ok(tasks.stream().map(this::toSummary).toList());
     }
@@ -53,6 +48,7 @@ public class TasksController {
                                               @PathVariable UUID familyId,
                                               @Valid @RequestBody CreateTaskRequest req) {
         UUID userId = currentUser.require(principal);
+        familyScopeAccess.requireMemberCanEdit(userId, familyId);
         Task t = createTask.run(userId, familyId, req.title(), req.description(),
                 req.assignedToId(), req.priority(), req.dueDate());
         return ResponseEntity.status(HttpStatus.CREATED).body(toSummary(t));

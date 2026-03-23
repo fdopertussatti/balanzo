@@ -13,7 +13,9 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import br.com.balanzo.common.exception.DomainException;
 import br.com.balanzo.common.security.CurrentUserResolver;
+import br.com.balanzo.security.authorization.FamilyScopeAccess;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,18 +25,23 @@ public class BudgetsController {
     private final BudgetRepository budgetRepository;
     private final CreateBudget createBudget;
     private final CurrentUserResolver currentUser;
+    private final FamilyScopeAccess familyScopeAccess;
 
     public BudgetsController(BudgetRepository budgetRepository, CreateBudget createBudget,
-                             CurrentUserResolver currentUser) {
+                             CurrentUserResolver currentUser, FamilyScopeAccess familyScopeAccess) {
         this.budgetRepository = budgetRepository;
         this.createBudget = createBudget;
         this.currentUser = currentUser;
+        this.familyScopeAccess = familyScopeAccess;
     }
 
     @GetMapping
     public ResponseEntity<List<BudgetSummary>> list(Principal principal,
                                                     @RequestParam(required = false) UUID familyId) {
         UUID userId = currentUser.require(principal);
+        if (familyId != null) {
+            familyScopeAccess.requireMemberCanView(userId, familyId);
+        }
         List<Budget> budgets;
         if (familyId != null) {
             budgets = budgetRepository.findByOwnerScopeAndOwnerFamilyId(OwnerScope.family, familyId);
@@ -47,6 +54,12 @@ public class BudgetsController {
     @PostMapping
     public ResponseEntity<BudgetSummary> create(Principal principal, @Valid @RequestBody CreateBudgetRequest req) {
         UUID userId = currentUser.require(principal);
+        if (req.ownerScope() == OwnerScope.family && req.familyId() == null) {
+            throw new DomainException("familyId is required when ownerScope is family");
+        }
+        if (req.ownerScope() == OwnerScope.family && req.familyId() != null) {
+            familyScopeAccess.requireMemberCanEdit(userId, req.familyId());
+        }
         Budget b = createBudget.run(userId, req.ownerScope(), req.familyId(), req.categoryId(),
                 req.periodStart(), req.periodEnd(), req.amount(), req.currency());
         return ResponseEntity.status(HttpStatus.CREATED).body(toSummary(b));

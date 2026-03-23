@@ -4,11 +4,15 @@ import br.com.balanzo.application.financeiro.CreateTransaction;
 import br.com.balanzo.common.exception.ResourceNotFoundException;
 import br.com.balanzo.common.security.CurrentUserResolver;
 import br.com.balanzo.domain.financeiro.entity.Transaction;
+import br.com.balanzo.security.authorization.AuthorizationContext;
+import br.com.balanzo.security.authorization.AuthorizationContextResolver;
+import br.com.balanzo.security.authorization.DomainAuthorizationService;
+import br.com.balanzo.security.authorization.ResourceScope;
+import br.com.balanzo.security.authorization.TransactionResourceScopeFactory;
 import br.com.balanzo.domain.financeiro.entity.TransactionType;
 import br.com.balanzo.infrastructure.persistence.financeiro.AccountRepository;
 import br.com.balanzo.infrastructure.persistence.financeiro.TransactionRepository;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.security.Principal;
@@ -33,15 +37,21 @@ public class TransactionsController {
     private final AccountRepository accountRepository;
     private final CreateTransaction createTransaction;
     private final CurrentUserResolver currentUser;
+    private final AuthorizationContextResolver authContextResolver;
+    private final DomainAuthorizationService authorizationService;
 
     public TransactionsController(TransactionRepository transactionRepository,
                                   AccountRepository accountRepository,
                                   CreateTransaction createTransaction,
-                                  CurrentUserResolver currentUser) {
+                                  CurrentUserResolver currentUser,
+                                  AuthorizationContextResolver authContextResolver,
+                                  DomainAuthorizationService authorizationService) {
         this.transactionRepository = transactionRepository;
         this.accountRepository = accountRepository;
         this.createTransaction = createTransaction;
         this.currentUser = currentUser;
+        this.authContextResolver = authContextResolver;
+        this.authorizationService = authorizationService;
     }
 
     @GetMapping("/{accountId}/transactions")
@@ -56,8 +66,19 @@ public class TransactionsController {
 
         var account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new ResourceNotFoundException("Account", accountId));
-        if (!account.getOwner().getId().equals(userId)) {
-            throw new ResourceNotFoundException("Account", accountId);
+
+        boolean isOwner = account.getOwner().getId().equals(userId);
+        UUID accountFamilyId = account.getFamily() != null ? account.getFamily().getId() : null;
+
+        if (!isOwner) {
+            if (accountFamilyId == null) {
+                throw new ResourceNotFoundException("Account", accountId);
+            }
+            var membershipCtx = authContextResolver.resolve(userId, AuthorizationContext.Operation.VIEW);
+            var familyAccess = new ResourceScope(null, accountFamilyId, ResourceScope.VisibilityLevel.SHARED_READ);
+            if (!authorizationService.isAuthorized(membershipCtx, familyAccess)) {
+                throw new ResourceNotFoundException("Account", accountId);
+            }
         }
 
         List<Transaction> transactions;
@@ -67,6 +88,14 @@ public class TransactionsController {
         } else {
             transactions = transactionRepository.findByAccountIdOrderByDateDesc(
                     accountId, org.springframework.data.domain.PageRequest.of(0, 100));
+        }
+
+        if (!isOwner) {
+            var viewCtx = authContextResolver.resolve(userId, AuthorizationContext.Operation.VIEW);
+            transactions = transactions.stream()
+                    .filter(tx -> authorizationService.isAuthorized(
+                            viewCtx, TransactionResourceScopeFactory.forTransaction(account, tx)))
+                    .toList();
         }
 
         var summaries = transactions.stream().map(this::toSummary).toList();

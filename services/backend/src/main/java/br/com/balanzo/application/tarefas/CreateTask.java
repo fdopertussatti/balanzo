@@ -1,13 +1,9 @@
 package br.com.balanzo.application.tarefas;
 
 import br.com.balanzo.domain.familia.entity.Family;
-import br.com.balanzo.domain.familia.entity.FamilyMember;
-import br.com.balanzo.domain.familia.entity.FamilyMemberRole;
-import br.com.balanzo.domain.familia.entity.FamilyMemberStatus;
+import br.com.balanzo.common.exception.ResourceNotFoundException;
 import br.com.balanzo.domain.tarefas.entity.Task;
 import br.com.balanzo.domain.tarefas.entity.TaskPriority;
-import br.com.balanzo.domain.identidade.entity.User;
-import br.com.balanzo.infrastructure.persistence.familia.FamilyMemberRepository;
 import br.com.balanzo.infrastructure.persistence.familia.FamilyRepository;
 import br.com.balanzo.infrastructure.persistence.tarefas.TaskRepository;
 import br.com.balanzo.infrastructure.persistence.identidade.UserRepository;
@@ -21,28 +17,22 @@ public class CreateTask {
 
     private final TaskRepository taskRepository;
     private final FamilyRepository familyRepository;
-    private final FamilyMemberRepository familyMemberRepository;
     private final UserRepository userRepository;
 
-    public CreateTask(TaskRepository tr, FamilyRepository fr, FamilyMemberRepository fmr,
-                      UserRepository ur) {
+    public CreateTask(TaskRepository tr, FamilyRepository fr, UserRepository ur) {
         this.taskRepository = tr;
         this.familyRepository = fr;
-        this.familyMemberRepository = fmr;
         this.userRepository = ur;
     }
 
+    /**
+     * @param userId caller (must be authorized for family scope by the API layer before invocation)
+     */
     @Transactional
     public Task run(UUID userId, UUID familyId, String title, String description,
                     UUID assignedToId, TaskPriority priority, LocalDate dueDate) {
         Family family = familyRepository.findById(familyId)
-                .orElseThrow(() -> new IllegalArgumentException("Family not found: " + familyId));
-
-        FamilyMember member = familyMemberRepository.findByFamilyIdAndUserId(familyId, userId)
-                .orElseThrow(() -> new IllegalArgumentException("User is not a member of this family"));
-        if (member.getStatus() != FamilyMemberStatus.active) {
-            throw new IllegalArgumentException("User is not an active member");
-        }
+                .orElseThrow(() -> new ResourceNotFoundException("Family", familyId));
 
         Task task = new Task(family, title);
         if (description != null) task.setDescription(description);
