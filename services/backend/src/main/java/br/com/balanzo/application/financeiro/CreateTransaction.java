@@ -4,6 +4,7 @@ import br.com.balanzo.domain.classificacao.entity.Category;
 import br.com.balanzo.domain.financeiro.entity.Account;
 import br.com.balanzo.domain.financeiro.entity.Transaction;
 import br.com.balanzo.domain.financeiro.entity.TransactionType;
+import br.com.balanzo.domain.financeiro.entity.VisibilityScope;
 import br.com.balanzo.domain.identidade.entity.User;
 import br.com.balanzo.infrastructure.persistence.classificacao.CategoryRepository;
 import br.com.balanzo.infrastructure.persistence.financeiro.AccountRepository;
@@ -34,7 +35,8 @@ public class CreateTransaction {
 
     @Transactional
     public Transaction run(UUID userId, UUID accountId, BigDecimal amount, String currency,
-                           TransactionType type, LocalDate date, String description, UUID categoryId) {
+                           TransactionType type, LocalDate date, String description, UUID categoryId,
+                           VisibilityScope visibilityScope) {
         User createdBy = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
 
@@ -51,6 +53,9 @@ public class CreateTransaction {
         }
         if (categoryId != null) {
             categoryRepository.findById(categoryId).ifPresent(tx::setCategory);
+        }
+        if (visibilityScope != null) {
+            tx.setVisibilityScope(visibilityScope);
         }
 
         return transactionRepository.save(tx);

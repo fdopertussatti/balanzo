@@ -1,9 +1,12 @@
 package br.com.balanzo.api.v1;
 
 import br.com.balanzo.application.financeiro.CreateTransaction;
+import br.com.balanzo.application.financeiro.GetTransactionAggregate;
+import br.com.balanzo.application.financeiro.UpdateTransaction;
 import br.com.balanzo.common.exception.ResourceNotFoundException;
 import br.com.balanzo.common.security.CurrentUserResolver;
 import br.com.balanzo.domain.financeiro.entity.Transaction;
+import br.com.balanzo.domain.financeiro.entity.VisibilityScope;
 import br.com.balanzo.security.authorization.AuthorizationContext;
 import br.com.balanzo.security.authorization.AuthorizationContextResolver;
 import br.com.balanzo.security.authorization.DomainAuthorizationService;
@@ -22,6 +25,7 @@ import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,19 +40,25 @@ public class TransactionsController {
     private final TransactionRepository transactionRepository;
     private final AccountRepository accountRepository;
     private final CreateTransaction createTransaction;
+    private final UpdateTransaction updateTransaction;
+    private final GetTransactionAggregate getTransactionAggregate;
     private final CurrentUserResolver currentUser;
     private final AuthorizationContextResolver authContextResolver;
     private final DomainAuthorizationService authorizationService;
 
     public TransactionsController(TransactionRepository transactionRepository,
                                   AccountRepository accountRepository,
-                                  CreateTransaction createTransaction,
-                                  CurrentUserResolver currentUser,
+        CreateTransaction createTransaction,
+        UpdateTransaction updateTransaction,
+        GetTransactionAggregate getTransactionAggregate,
+        CurrentUserResolver currentUser,
                                   AuthorizationContextResolver authContextResolver,
                                   DomainAuthorizationService authorizationService) {
         this.transactionRepository = transactionRepository;
         this.accountRepository = accountRepository;
         this.createTransaction = createTransaction;
+        this.updateTransaction = updateTransaction;
+        this.getTransactionAggregate = getTransactionAggregate;
         this.currentUser = currentUser;
         this.authContextResolver = authContextResolver;
         this.authorizationService = authorizationService;
@@ -102,6 +112,23 @@ public class TransactionsController {
         return ResponseEntity.ok(summaries);
     }
 
+    @GetMapping("/{accountId}/transactions/aggregate")
+    public ResponseEntity<TransactionAggregateSummary> aggregate(Principal principal,
+                                                                  @PathVariable UUID accountId,
+                                                                  @RequestParam(required = false) LocalDate start,
+                                                                  @RequestParam(required = false) LocalDate end) {
+        UUID userId = currentUser.resolve(principal).orElse(null);
+        if (userId == null) {
+            return ResponseEntity.ok(new TransactionAggregateSummary(
+                    BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, 0));
+        }
+
+        var result = getTransactionAggregate.run(userId, accountId, start, end);
+        return ResponseEntity.ok(new TransactionAggregateSummary(
+                result.totalIncome(), result.totalExpense(), result.totalTransfer(),
+                result.transactionCount()));
+    }
+
     @PostMapping("/{accountId}/transactions")
     public ResponseEntity<TransactionSummary> create(Principal principal,
                                                      @PathVariable UUID accountId,
@@ -115,9 +142,24 @@ public class TransactionsController {
                 request.type(),
                 request.date(),
                 request.description(),
-                request.categoryId()
+                request.categoryId(),
+                request.visibilityScope()
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(toSummary(tx));
+    }
+
+    @PatchMapping("/{accountId}/transactions/{transactionId}")
+    public ResponseEntity<TransactionSummary> update(Principal principal,
+                                                      @PathVariable UUID accountId,
+                                                      @PathVariable UUID transactionId,
+                                                      @Valid @RequestBody UpdateTransactionRequest request) {
+        UUID userId = currentUser.require(principal);
+        Transaction tx = updateTransaction.run(
+                userId, accountId, transactionId,
+                request.amount(), request.date(), request.description(),
+                request.categoryId(), request.visibilityScope()
+        );
+        return ResponseEntity.ok(toSummary(tx));
     }
 
     private TransactionSummary toSummary(Transaction t) {
@@ -129,12 +171,17 @@ public class TransactionsController {
                 t.getType().name(),
                 t.getDate(),
                 t.getDescription(),
-                t.getCategory() != null ? t.getCategory().getId() : null
+                t.getCategory() != null ? t.getCategory().getId() : null,
+                t.getVisibilityScope().toDbValue()
         );
     }
 
     public record TransactionSummary(UUID id, UUID accountId, BigDecimal amount, String currency,
-                                     String type, LocalDate date, String description, UUID categoryId) {}
+                                     String type, LocalDate date, String description, UUID categoryId,
+                                     String visibilityScope) {}
+
+    public record TransactionAggregateSummary(BigDecimal totalIncome, BigDecimal totalExpense,
+                                              BigDecimal totalTransfer, int transactionCount) {}
 
     public record CreateTransactionRequest(
             @NotNull BigDecimal amount,
@@ -142,6 +189,15 @@ public class TransactionsController {
             @NotNull TransactionType type,
             @NotNull LocalDate date,
             String description,
-            UUID categoryId
+            UUID categoryId,
+            VisibilityScope visibilityScope
+    ) {}
+
+    public record UpdateTransactionRequest(
+            BigDecimal amount,
+            LocalDate date,
+            String description,
+            UUID categoryId,
+            VisibilityScope visibilityScope
     ) {}
 }
