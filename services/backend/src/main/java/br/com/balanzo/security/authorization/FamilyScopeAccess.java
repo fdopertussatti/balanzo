@@ -37,4 +37,13 @@ public class FamilyScopeAccess {
         var scope = new ResourceScope(null, familyId, ResourceScope.VisibilityLevel.SHARED_EDIT);
         authorizationService.requireAuthorized(ctx, scope);
     }
+
+    /**
+     * User must be owner or admin in the family (add members, manage shared resources).
+     */
+    public void requireMemberCanManage(UUID userId, UUID familyId) {
+        var ctx = contextResolver.resolve(userId, AuthorizationContext.Operation.MANAGE);
+        var scope = new ResourceScope(null, familyId, ResourceScope.VisibilityLevel.SHARED_MANAGE);
+        authorizationService.requireAuthorized(ctx, scope);
+    }
 }

@@ -1,6 +1,7 @@
 package br.com.balanzo.security.authorization;
 
 import br.com.balanzo.common.exception.ForbiddenException;
+import br.com.balanzo.domain.familia.entity.FamilyMemberRole;
 import org.springframework.stereotype.Service;
 
 /**
@@ -37,7 +38,7 @@ public class DomainAuthorizationService {
         return switch (context.operation()) {
             case VIEW -> canView(isOwner, isInFamily, resource.visibility());
             case EDIT -> canEdit(isOwner, isInFamily, resource.visibility());
-            case MANAGE -> canManage(isOwner, isInFamily, resource.visibility());
+            case MANAGE -> canManage(isOwner, isInFamily, resource.visibility(), context, resource);
         };
     }
 
@@ -57,8 +58,14 @@ public class DomainAuthorizationService {
         };
     }
 
-    private boolean canManage(boolean isOwner, boolean isInFamily, ResourceScope.VisibilityLevel visibility) {
+    /**
+     * Manage: owner always; for family-scoped SHARED_MANAGE, only admin/owner role (per strategy doc).
+     */
+    private boolean canManage(boolean isOwner, boolean isInFamily, ResourceScope.VisibilityLevel visibility,
+                              AuthorizationContext context, ResourceScope resource) {
         if (isOwner) return true;
-        return visibility == ResourceScope.VisibilityLevel.SHARED_MANAGE && isInFamily;
+        if (visibility != ResourceScope.VisibilityLevel.SHARED_MANAGE || !isInFamily) return false;
+        var role = resource.familyId() != null ? context.familyRoles().get(resource.familyId()) : null;
+        return role == FamilyMemberRole.owner || role == FamilyMemberRole.admin;
     }
 }

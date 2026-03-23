@@ -3,6 +3,7 @@ package br.com.balanzo.api.v1;
 import br.com.balanzo.application.familia.AddFamilyMember;
 import br.com.balanzo.application.familia.CreateFamily;
 import br.com.balanzo.common.security.CurrentUserResolver;
+import br.com.balanzo.security.authorization.FamilyScopeAccess;
 import br.com.balanzo.domain.familia.entity.Family;
 import br.com.balanzo.domain.familia.entity.FamilyMember;
 import br.com.balanzo.domain.familia.entity.FamilyMemberRole;
@@ -32,17 +33,20 @@ public class FamiliesController {
     private final FamilyMemberRepository familyMemberRepository;
     private final CreateFamily createFamily;
     private final AddFamilyMember addFamilyMember;
+    private final FamilyScopeAccess familyScopeAccess;
     private final CurrentUserResolver currentUser;
 
     public FamiliesController(FamilyRepository familyRepository,
                               FamilyMemberRepository familyMemberRepository,
                               CreateFamily createFamily,
                               AddFamilyMember addFamilyMember,
+                              FamilyScopeAccess familyScopeAccess,
                               CurrentUserResolver currentUser) {
         this.familyRepository = familyRepository;
         this.familyMemberRepository = familyMemberRepository;
         this.createFamily = createFamily;
         this.addFamilyMember = addFamilyMember;
+        this.familyScopeAccess = familyScopeAccess;
         this.currentUser = currentUser;
     }
 
@@ -70,6 +74,7 @@ public class FamiliesController {
                                                    @PathVariable UUID familyId,
                                                    @Valid @RequestBody AddMemberRequest request) {
         UUID userId = currentUser.require(principal);
+        familyScopeAccess.requireMemberCanManage(userId, familyId);
         FamilyMember member = addFamilyMember.run(userId, familyId, request.userId(), request.role());
         return ResponseEntity.status(HttpStatus.CREATED).body(toMemberSummary(member));
     }
