@@ -1,7 +1,7 @@
 # Convenções de commit e push
 
-**Versão:** 1.1  
-**Última atualização:** 2026-03-22  
+**Versão:** 1.2  
+**Última atualização:** 2026-04-06  
 **Status:** Aprovado
 
 ---
@@ -87,3 +87,32 @@ ci: add deploy workflow for staging
 4. **Branches de feature:** `feat/nome-da-feature` ou `fix/nome-do-fix`.
 
 5. **Mensagens de push:** não exigidas; o histórico é baseado nos commits.
+
+---
+
+## Atalho no Cursor: mensagem `1`
+
+Quando o usuário enviar **somente** `1` (texto trimado, sem outro pedido na mesma mensagem), o assistente deve tratar como instrução para **criar commit e enviar para `origin`**, seguindo este documento e a regra `.cursor/rules/commit-push-atalho-1.mdc`.
+
+### Passos
+
+1. **`git status`** — ver o que mudou e em quais caminhos.
+2. **Staging** — `git add` nos arquivos que pertencem à mesma entrega lógica. Se houver alterações **não relacionadas** no working tree, preferir **dois commits** separados ou pedir confirmação ao usuário antes de misturar tudo em um único commit.
+3. **Mensagem** — Conventional Commits: primeira linha ≤72 caracteres; escopo quando fizer sentido; corpo opcional com detalhes. **Descrição preferencialmente em inglês** (alinhado a `convencoes-de-linguagem.md` e ao código).
+4. **Qualidade antes do push** — quando fizer sentido para o que mudou, rodar build e/ou testes; não enviar alterações que claramente quebram o projeto.
+5. **`git push`** — para o remoto configurado (em geral `origin`) na branch atual.
+
+### Casos especiais
+
+| Situação | Ação |
+|----------|------|
+| Working tree limpo | Informar que não há nada a commitar; não criar commit vazio. |
+| Push rejeitado ou divergência | Reportar a saída do Git; próximos passos podem ser `git pull --rebase` (ou fluxo acordado pelo time) antes de novo push. |
+| Entrega com docs | Incluir atualizações em `docs/` no mesmo commit ou em commit `docs:` logo em seguida, conforme `docs-sempre-atualizados.mdc`. |
+
+### Boas práticas (engenharia de software)
+
+- Commits **pequenos e coesos** (uma intenção por commit quando possível).
+- Mensagem que responda **o quê** e, no corpo quando necessário, **por quê**.
+- **Não** incluir segredos (`.env`, chaves); respeitar `.gitignore`.
+- Em branches compartilhadas, alinhar com **PR/review** antes de push para `main`, se for política do time.

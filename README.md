@@ -59,5 +59,5 @@ Java, Spring Boot, Next.js, Flutter, PostgreSQL, Supabase, Stripe, Docker
 
 ## Convenções
 
-- **Commits:** [Conventional Commits](docs/00-governanca/convencoes-de-commit-e-push.md)
+- **Commits:** [Conventional Commits](docs/00-governanca/convencoes-de-commit-e-push.md) (inclui atalho Cursor: mensagem `1` → commit e push)
 - **Linguagem:** docs em português, código em inglês — [detalhes](docs/00-governanca/convencoes-de-linguagem.md)

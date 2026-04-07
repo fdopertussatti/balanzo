@@ -1,0 +1,28 @@
+---
+description: Mensagem "1" = commit e push conforme convenções do repositório
+alwaysApply: true
+---
+
+# Atalho `1`: commit e push
+
+## Regra
+
+Se a mensagem do usuário for **apenas** o caractere `1` (após remover espaços em branco no início e fim), **sem outro pedido na mesma mensagem**, execute o fluxo de **commit e push** descrito em `docs/00-governanca/convencoes-de-commit-e-push.md` (seção **Atalho no Cursor: mensagem `1`**).
+
+## O que fazer
+
+1. Rodar `git status` no repositório do workspace.
+2. Fazer **staging** dos arquivos que compõem uma única entrega lógica; se houver mudanças misturadas sem relação, preferir commits separados ou perguntar ao usuário.
+3. Criar commit com mensagem no padrão **Conventional Commits** (ver documento de convenções); descrição na primeira linha preferencialmente em **inglês**.
+4. Quando adequado ao escopo da mudança, verificar build/testes antes do push.
+5. Executar `git push` para o remoto da branch atual (normalmente `origin`).
+
+## O que não fazer
+
+- Não inventar commit se não houver alterações staged relevantes.
+- Não ignorar falhas explícitas de push sem informar o usuário.
+- Não violar `docs-sempre-atualizados.mdc`: se a entrega exige atualização de `docs/`, incluir nesse commit ou no `docs:` seguinte.
+
+## Fonte canônica
+
+`docs/00-governanca/convencoes-de-commit-e-push.md`

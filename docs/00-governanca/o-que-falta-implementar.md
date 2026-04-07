@@ -1,10 +1,10 @@
 # O que falta implementar — Balanzo
 
-**Versão:** 1.1  
-**Última atualização:** 2026-03-23  
+**Versão:** 1.2  
+**Última atualização:** 2026-04-06  
 **Status:** Ativo
 
-> **Regra de desenvolvimento:** Sempre manter este documento e os demais em `docs/` atualizados após cada entrega ou mudança relevante. Ver `.cursor/rules/docs-sempre-atualizados.mdc` e `docs/00-governanca/convencoes-de-commit-e-push.md`.
+> **Regra de desenvolvimento:** Sempre manter este documento e os demais em `docs/` atualizados após cada entrega ou mudança relevante. Ver `.cursor/rules/docs-sempre-atualizados.mdc` e `docs/00-governanca/convencoes-de-commit-e-push.md`. **Atalho no Cursor:** mensagem apenas `1` dispara commit + push conforme essas convenções (ver seção "Atalho no Cursor" no mesmo arquivo).
 
 ---
 
@@ -29,7 +29,7 @@
 | Frontend admin | ❌ | — |
 | App mobile | ❌ | — |
 | Site institucional | ❌ | — |
-| Infra/DevOps | ❌ | Supabase, CI/CD, Docker, deploy |
+| Infra/DevOps | ⚠️ Parcial | Backend configurado para Postgres+JWT no Supabase (env); CI/CD, deploy |
 
 ---
 
@@ -39,6 +39,8 @@
 
 - [x] Bootstrap Spring Boot (pom, config, security)
 - [x] JWT Supabase Auth (condicional)
+- [x] Dev local: JDBC sem proxy SOCKS (`BalanzoApplication` + `spring-boot-maven-plugin`; ver README)
+- [x] Flyway em Supabase: `baseline-on-migrate` + `baseline-version: 0` (schema `public` já não vazio; ver README)
 - [x] Flyway + schema SQL inicial (V1)
 - [x] Trigger auth.users → public.user (V2)
 - [x] Entidades: User, Family, FamilyMember
@@ -205,6 +207,8 @@ Conforme `docs/02-arquitetura/estrategia-de-autorizacao-e-compartilhamento-famil
 | Dashboard (contas, transações) | ✅ |
 | Telas principais | ⚠️ Mínimo (listagem) |
 
+Cadastro: quando o projeto Supabase exige confirmação por email, não há sessão após `signUp`; a UI explica que o envio é do Supabase, sugere checagens (spam, SMTP, painel) e oferece reenvio (`auth.resend`). Login com `email_not_confirmed` mostra mensagem em PT e atalho de reenvio. O modo **Entrar** / **Criar conta** é um seletor em abas no topo do formulário (feedback visual claro).
+
 ### 4.2 Frontend admin (apps/admin)
 
 | Item | Status |
@@ -229,7 +233,7 @@ Conforme `docs/02-arquitetura/estrategia-de-autorizacao-e-compartilhamento-famil
 
 | Item | Status |
 |------|--------|
-| Supabase (projeto configurado) | ❌ |
+| Supabase (projeto configurado) | ⚠️ Credenciais em env local (`DATABASE_PASSWORD`, `.env.local` no web) |
 | CI/CD (GitHub Actions) | ❌ |
 | Docker Compose local (Postgres) | ✅ |
 | Variáveis de ambiente (secrets) | 📄 Docs existem |

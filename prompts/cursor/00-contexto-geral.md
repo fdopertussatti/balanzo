@@ -1,7 +1,7 @@
 # Ponto de Entrada — Balanzo para Cursor AI
 
-**Versão:** 1.0  
-**Última atualização:** 2025-03-07  
+**Versão:** 1.1  
+**Última atualização:** 2026-04-06  
 **Status:** Aprovado
 
 ---
@@ -68,6 +68,7 @@ Antes de implementar, consulte:
 - Evitar soluções que conflitem com os docs oficiais
 - Não espalhar regras de negócio em camadas inadequadas
 - Explicitar quando uma sugestão altera a arquitetura
+- **Mensagem só `1`:** commit + push seguindo `docs/00-governanca/convencoes-de-commit-e-push.md` (atalho documentado; regra `.cursor/rules/commit-push-atalho-1.mdc`)
 
 **Regras detalhadas:** `prompts/cursor/01-regras-de-implementacao.md`
 
